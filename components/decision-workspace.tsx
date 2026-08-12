@@ -14,9 +14,7 @@ const workflow = `flowchart LR
   G --> H[Implementation backlog]
   H --> I[Decision packet]`;
 
-const analyses = {
-  unis: {
-    label: "UNIS logistics",
+const analysis = {
     target: "https://unisco.com",
     competitor: "https://www.nfiindustries.com",
     competitorName: "NFI",
@@ -38,31 +36,6 @@ const analyses = {
       ["UNIS exposes California locations but can connect them more directly to buyer use cases", "https://www.unisco.com/locations/california", "Observed", "High"],
       ["A California 3PL hub can turn network breadth into a qualified enterprise buying path", "Cross-site synthesis", "Inference", "Medium"],
     ],
-  },
-  cubework: {
-    label: "Cubework flex space",
-    target: "https://www.cubework.com",
-    competitor: "https://readyspaces.com",
-    competitorName: "ReadySpaces",
-    goal: "Increase qualified flexible warehouse tour requests",
-    decision: "Build a market-level flexible warehouse finder",
-    score: 89,
-    path: "/warehouse-space/california",
-    headline: "Warehouse space that flexes with your business.",
-    description: "Compare available units, dock access, parking and workspace amenities before booking a tour.",
-    opportunities: [
-      ["Market warehouse finder", "Impact 5 · Intent 5 · Confidence 4", "89"],
-      ["Available-unit proof", "Impact 5 · Intent 4 · Confidence 4", "85"],
-      ["Tour qualification flow", "Impact 4 · Intent 5 · Confidence 4", "81"],
-    ],
-    rationale: "Cubework and ReadySpaces both sell flexible warehouse and industrial workspace. The opportunity is to win high-intent local searches with clearer availability, unit specifications and a shorter tour-booking path.",
-    evidence: [
-      ["Cubework offers on-demand warehouse, office, parking and logistics space", "https://www.cubework.com", "Observed", "High"],
-      ["ReadySpaces competes in flexible warehouse and co-warehousing for growing businesses", "https://readyspaces.com", "Observed", "High"],
-      ["Location and facility details are central to buyer evaluation in this category", "https://www.cubework.com", "Observed", "High"],
-      ["A market finder with live unit proof can reduce friction before a tour request", "Cross-site synthesis", "Inference", "Medium"],
-    ],
-  },
 } as const;
 
 const stages = [
@@ -81,15 +54,8 @@ const roadmap = [
 ];
 
 export function DecisionWorkspace() {
-  const [analysisKey, setAnalysisKey] = useState<keyof typeof analyses>("unis");
-  const analysis = analyses[analysisKey];
   const [goal, setGoal] = useState<string>(analysis.goal);
   const [running, setRunning] = useState(false);
-
-  function selectAnalysis(key: keyof typeof analyses) {
-    setAnalysisKey(key);
-    setGoal(analyses[key].goal);
-  }
 
   function simulateRun() {
     setRunning(true);
@@ -127,7 +93,6 @@ export function DecisionWorkspace() {
       </section>
 
       <section className="query-panel">
-        <div className="analysis-switch" aria-label="Choose analysis"><small>ANALYSIS</small>{(Object.keys(analyses) as Array<keyof typeof analyses>).map((key) => <button className={analysisKey === key ? "selected" : ""} key={key} onClick={() => selectAnalysis(key)}>{analyses[key].label}</button>)}</div>
         <label>Target website<input value={analysis.target} readOnly /></label>
         <label>True competitor<input value={analysis.competitor} readOnly /></label>
         <label className="goal">Business objective<input value={goal} onChange={(e) => setGoal(e.target.value)} /></label>
@@ -170,7 +135,7 @@ export function DecisionWorkspace() {
           <p className="eyebrow">Implementation-ready page</p>
           <h2>{analysis.path}</h2>
           <div className="blueprint">
-            <div className="hero-block"><small>HERO</small><b>{analysis.headline}</b><span>{analysis.description}</span><button>{analysisKey === "unis" ? "Request a consultation" : "Book a warehouse tour"}</button></div>
+            <div className="hero-block"><small>HERO</small><b>{analysis.headline}</b><span>{analysis.description}</span><button>Request a consultation</button></div>
             <div className="module-row"><span>Market selector</span><span>Service fit</span><span>Facility proof</span></div>
             <div className="content-lines"><i /><i /><i /></div>
           </div>
