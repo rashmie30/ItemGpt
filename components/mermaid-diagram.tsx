@@ -15,12 +15,12 @@ export function MermaidDiagram({ chart }: { chart: string }) {
         securityLevel: "strict",
         themeVariables: {
           fontFamily: "DM Sans",
-          primaryColor: "#dff7e7",
-          primaryTextColor: "#10251a",
-          primaryBorderColor: "#39a862",
-          lineColor: "#7d8b84",
-          secondaryColor: "#f0eadb",
-          tertiaryColor: "#f6f7f3",
+          primaryColor: "#f4d3d6",
+          primaryTextColor: "#1a1a1a",
+          primaryBorderColor: "#e1261c",
+          lineColor: "#7a7a7a",
+          secondaryColor: "#c2d5ed",
+          tertiaryColor: "#f6f6f6",
         },
       });
       const result = await mermaid.render(`diagram-${id}`, chart);
