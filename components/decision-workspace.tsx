@@ -14,23 +14,56 @@ const workflow = `flowchart LR
   G --> H[Implementation backlog]
   H --> I[Decision packet]`;
 
-const architecture = `flowchart TB
-  U[Operator] --> I[ItemGPT]
-  I --> A[Website Decision Intelligence Agent]
-  A --> B[Browser Automation]
-  B --> W1[UNIS public website]
-  B --> W2[Cubework public website]
-  W1 --> E[Evidence model]
-  W2 --> E
-  E --> S[Scorecards and strategy]
-  S --> R[Markdown artifact]`;
-
-const evidence = [
-  ["UNIS presents integrated logistics, warehousing and transportation breadth", "unisco.com/our-services", "Observed", "High"],
-  ["Cubework uses facility-led positioning with direct space discovery", "cubework.com", "Observed", "High"],
-  ["UNIS has a California location surface but limited buyer qualification", "unisco.com/locations/california", "Observed", "High"],
-  ["A California solution hub can convert broad service strength into local intent", "Cross-site synthesis", "Inference", "Medium"],
-];
+const analyses = {
+  unis: {
+    label: "UNIS logistics",
+    target: "https://unisco.com",
+    competitor: "https://www.nfiindustries.com",
+    competitorName: "NFI",
+    goal: "Increase qualified California 3PL and transportation leads",
+    decision: "Build a California 3PL solutions hub",
+    score: 92,
+    path: "/locations/california/3pl-solutions",
+    headline: "California logistics, connected end to end.",
+    description: "Warehousing, drayage, transloading, fulfillment and transportation through one accountable network.",
+    opportunities: [
+      ["California 3PL solutions hub", "Impact 5 · Intent 5 · Confidence 4", "92"],
+      ["Industry proof modules", "Impact 5 · Intent 4 · Confidence 4", "86"],
+      ["Solution-fit lead routing", "Impact 4 · Intent 5 · Confidence 4", "82"],
+    ],
+    rationale: "UNIS and NFI compete as integrated, asset-backed logistics providers. The opportunity is to make UNIS's California network, service fit and operational proof easier for enterprise buyers to evaluate.",
+    evidence: [
+      ["UNIS positions itself as an asset-based 3PL spanning fulfillment, warehousing and transportation", "https://www.unisco.com/about-us", "Observed", "High"],
+      ["NFI competes across integrated distribution, transportation and supply-chain services", "https://www.nfiindustries.com", "Observed", "High"],
+      ["UNIS exposes California locations but can connect them more directly to buyer use cases", "https://www.unisco.com/locations/california", "Observed", "High"],
+      ["A California 3PL hub can turn network breadth into a qualified enterprise buying path", "Cross-site synthesis", "Inference", "Medium"],
+    ],
+  },
+  cubework: {
+    label: "Cubework flex space",
+    target: "https://www.cubework.com",
+    competitor: "https://readyspaces.com",
+    competitorName: "ReadySpaces",
+    goal: "Increase qualified flexible warehouse tour requests",
+    decision: "Build a market-level flexible warehouse finder",
+    score: 89,
+    path: "/warehouse-space/california",
+    headline: "Warehouse space that flexes with your business.",
+    description: "Compare available units, dock access, parking and workspace amenities before booking a tour.",
+    opportunities: [
+      ["Market warehouse finder", "Impact 5 · Intent 5 · Confidence 4", "89"],
+      ["Available-unit proof", "Impact 5 · Intent 4 · Confidence 4", "85"],
+      ["Tour qualification flow", "Impact 4 · Intent 5 · Confidence 4", "81"],
+    ],
+    rationale: "Cubework and ReadySpaces both sell flexible warehouse and industrial workspace. The opportunity is to win high-intent local searches with clearer availability, unit specifications and a shorter tour-booking path.",
+    evidence: [
+      ["Cubework offers on-demand warehouse, office, parking and logistics space", "https://www.cubework.com", "Observed", "High"],
+      ["ReadySpaces competes in flexible warehouse and co-warehousing for growing businesses", "https://readyspaces.com", "Observed", "High"],
+      ["Location and facility details are central to buyer evaluation in this category", "https://www.cubework.com", "Observed", "High"],
+      ["A market finder with live unit proof can reduce friction before a tour request", "Cross-site synthesis", "Inference", "Medium"],
+    ],
+  },
+} as const;
 
 const stages = [
   ["Frame", "Complete", "Objective and target market"],
@@ -48,10 +81,15 @@ const roadmap = [
 ];
 
 export function DecisionWorkspace() {
-  const [target, setTarget] = useState("https://unisco.com");
-  const [competitor, setCompetitor] = useState("https://cubework.com");
-  const [goal, setGoal] = useState("Increase qualified California warehouse and logistics leads");
+  const [analysisKey, setAnalysisKey] = useState<keyof typeof analyses>("unis");
+  const analysis = analyses[analysisKey];
+  const [goal, setGoal] = useState<string>(analysis.goal);
   const [running, setRunning] = useState(false);
+
+  function selectAnalysis(key: keyof typeof analyses) {
+    setAnalysisKey(key);
+    setGoal(analyses[key].goal);
+  }
 
   function simulateRun() {
     setRunning(true);
@@ -59,7 +97,7 @@ export function DecisionWorkspace() {
   }
 
   function downloadReport() {
-    const report = `# Website Decision Intelligence — UNIS vs Cubework\n\n## Executive decision\nBuild a California logistics and warehousing hub that combines local facility proof with UNIS's integrated service breadth.\n\n## Objective\n${goal}\n\n## Sources\n- ${target}\n- ${competitor}\n\n## Priority\nP0 — California logistics and warehousing hub\n\n## Agent\nWebsite Decision Intelligence Agent (dynamic-agent-Vd8b9fHBljnv)\n`;
+    const report = `# Website Decision Intelligence — ${new URL(analysis.target).hostname} vs ${analysis.competitorName}\n\n## Executive decision\n${analysis.decision}\n\n## Objective\n${goal}\n\n## Sources\n- ${analysis.target}\n- ${analysis.competitor}\n\n## Priority\nP0 — ${analysis.decision}\n\n## Agent\nWebsite Decision Intelligence Agent (dynamic-agent-Vd8b9fHBljnv)\n`;
     const blob = new Blob([report], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
@@ -89,15 +127,16 @@ export function DecisionWorkspace() {
       </section>
 
       <section className="query-panel">
-        <label>Target website<input value={target} onChange={(e) => setTarget(e.target.value)} /></label>
-        <label>Competitor<input value={competitor} onChange={(e) => setCompetitor(e.target.value)} /></label>
+        <div className="analysis-switch" aria-label="Choose analysis"><small>ANALYSIS</small>{(Object.keys(analyses) as Array<keyof typeof analyses>).map((key) => <button className={analysisKey === key ? "selected" : ""} key={key} onClick={() => selectAnalysis(key)}>{analyses[key].label}</button>)}</div>
+        <label>Target website<input value={analysis.target} readOnly /></label>
+        <label>True competitor<input value={analysis.competitor} readOnly /></label>
         <label className="goal">Business objective<input value={goal} onChange={(e) => setGoal(e.target.value)} /></label>
         <button onClick={simulateRun} disabled={running}>{running ? <><span className="spinner" /> Analyzing</> : <><Search size={16} /> Run sample analysis</>}</button>
       </section>
 
       <section className="decision-strip">
-        <div><small>PRIMARY DECISION</small><h2>Build a California logistics & warehousing hub</h2></div>
-        <div className="score"><strong>92</strong><span>/100<br />opportunity</span></div>
+        <div><small>PRIMARY DECISION</small><h2>{analysis.decision}</h2></div>
+        <div className="score"><strong>{analysis.score}</strong><span>/100<br />opportunity</span></div>
         <div className="confidence"><span>Evidence confidence</span><b>High</b></div>
         <button className="secondary" onClick={downloadReport}><Download size={15} /> Download report</button>
       </section>
@@ -113,27 +152,25 @@ export function DecisionWorkspace() {
 
         <aside className="ranking">
           <p className="eyebrow">Ranked opportunities</p>
-          <div className="rank active"><span>01</span><div><b>California solution hub</b><small>Impact 5 · Intent 5 · Confidence 4</small></div><strong>92</strong></div>
-          <div className="rank"><span>02</span><div><b>Facility proof modules</b><small>Impact 5 · Intent 4 · Confidence 4</small></div><strong>86</strong></div>
-          <div className="rank"><span>03</span><div><b>Lead-routing form</b><small>Impact 4 · Intent 5 · Confidence 4</small></div><strong>82</strong></div>
-          <div className="why"><small>WHY THIS WON</small><p>UNIS owns broader integrated capabilities. Cubework makes local space discovery more explicit. The opportunity joins both advantages.</p></div>
+          {analysis.opportunities.map(([title, detail, score], index) => <div className={`rank ${index === 0 ? "active" : ""}`} key={title}><span>0{index + 1}</span><div><b>{title}</b><small>{detail}</small></div><strong>{score}</strong></div>)}
+          <div className="why"><small>WHY THIS WON</small><p>{analysis.rationale}</p></div>
         </aside>
       </section>
 
       <section className="evidence-section">
-        <div className="section-head"><div><p className="eyebrow">Grounded evidence</p><h2>Observed first. Inferred second.</h2></div><a href="https://unisco.com" target="_blank">View target <ArrowUpRight size={14} /></a></div>
+        <div className="section-head"><div><p className="eyebrow">Grounded evidence</p><h2>Observed first. Inferred second.</h2></div><a href={analysis.target} target="_blank">View target <ArrowUpRight size={14} /></a></div>
         <div className="evidence-table">
           <div className="table-row table-head"><span>Finding</span><span>Source</span><span>Type</span><span>Confidence</span></div>
-          {evidence.map(([finding, source, type, confidence]) => <div className="table-row" key={finding}><span>{finding}</span><span><a href={source.startsWith("http") ? source : `https://${source}`} target="_blank">{source}</a></span><span><i className={type.toLowerCase()}>{type}</i></span><span>{confidence}</span></div>)}
+          {analysis.evidence.map(([finding, source, type, confidence]) => <div className="table-row" key={finding}><span>{finding}</span><span>{source.startsWith("http") ? <a href={source} target="_blank">{new URL(source).hostname}</a> : source}</span><span><i className={type.toLowerCase()}>{type}</i></span><span>{confidence}</span></div>)}
         </div>
       </section>
 
       <section className="strategy-grid">
         <div className="page-blueprint">
           <p className="eyebrow">Implementation-ready page</p>
-          <h2>/locations/california/logistics</h2>
+          <h2>{analysis.path}</h2>
           <div className="blueprint">
-            <div className="hero-block"><small>HERO</small><b>California logistics, connected end to end.</b><span>Warehousing, drayage, transloading, fulfillment and transportation through one accountable network.</span><button>Request a consultation</button></div>
+            <div className="hero-block"><small>HERO</small><b>{analysis.headline}</b><span>{analysis.description}</span><button>{analysisKey === "unis" ? "Request a consultation" : "Book a warehouse tour"}</button></div>
             <div className="module-row"><span>Market selector</span><span>Service fit</span><span>Facility proof</span></div>
             <div className="content-lines"><i /><i /><i /></div>
           </div>
@@ -146,7 +183,7 @@ export function DecisionWorkspace() {
 
       <section className="architecture">
         <div><p className="eyebrow">System architecture</p><h2>ItemGPT is the intelligence layer.</h2><p>The custom agent directs public browser research, applies a consistent evidence model, and packages the decision as a portable artifact.</p></div>
-        <MermaidDiagram chart={architecture} />
+        <MermaidDiagram chart={`flowchart TB\n  U[Operator] --> I[ItemGPT]\n  I --> A[Website Decision Intelligence Agent]\n  A --> B[Browser Automation]\n  B --> W1[${new URL(analysis.target).hostname}]\n  B --> W2[${analysis.competitorName}]\n  W1 --> E[Evidence model]\n  W2 --> E\n  E --> S[Scorecards and strategy]\n  S --> R[Markdown artifact]`} />
       </section>
 
       <footer><span>ItemGPT Website Decision Intelligence</span><span>Public demonstration · Sample analysis · No private analytics</span><a href="https://github.com/rashmie30/ItemGpt" target="_blank">View source <ArrowUpRight size={13} /></a></footer>

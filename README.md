@@ -40,4 +40,4 @@ The repository is ready for a Vercel import with no required environment variabl
 
 ## Evidence policy
 
-The demonstration uses sample scorecards derived from the recorded UNIS-versus-Cubework ItemGPT run. It does not invent private analytics, rankings, conversion data, Lighthouse scores or screenshots. Browser screenshots are included only when ItemGPT returns a real artifact URL.
+The demonstration includes two category-correct sample analyses: UNIS versus integrated 3PL competitor NFI, and Cubework versus flexible-warehouse competitor ReadySpaces. It does not invent private analytics, rankings, conversion data, Lighthouse scores or screenshots. Browser screenshots are included only when ItemGPT returns a real artifact URL.
